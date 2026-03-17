@@ -1,9 +1,5 @@
-import { redirect } from "next/navigation";
+import { KitCreatedSuccessContent } from "../success/kit-created-success-content";
 
-/**
- * Server-only route: no client components, no useSearchParams.
- * Avoids prerender/CSR bailout on /app/success. Real UI lives at /app/kit-live.
- */
 export const dynamic = "force-dynamic";
 
 function slugFromSearchParams(
@@ -14,14 +10,11 @@ function slugFromSearchParams(
   return Array.isArray(raw) ? raw[0] ?? null : raw || null;
 }
 
-export default function AppSuccessRedirect({
+export default function KitLivePage({
   searchParams,
 }: {
   searchParams: Record<string, string | string[] | undefined>;
 }) {
   const slug = slugFromSearchParams(searchParams);
-  if (slug) {
-    redirect(`/app/kit-live?slug=${encodeURIComponent(slug)}`);
-  }
-  redirect("/app/builder");
+  return <KitCreatedSuccessContent slug={slug} />;
 }

@@ -2,14 +2,14 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import confetti from "canvas-confetti";
 import { Button } from "@/components/ui/button";
 
-export function KitCreatedSuccessContent() {
+type Props = { slug: string | null };
+
+export function KitCreatedSuccessContent({ slug }: Props) {
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const slug = searchParams.get("slug");
   const [countdown, setCountdown] = useState(5);
   const [copied, setCopied] = useState(false);
 

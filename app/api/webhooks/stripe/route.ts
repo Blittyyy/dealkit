@@ -2,13 +2,15 @@ import { NextResponse } from "next/server";
 import Stripe from "stripe";
 import { createAdminClient } from "@/lib/supabase/admin";
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
-const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET!;
-
 export async function POST(request: Request) {
+  if (!process.env.STRIPE_SECRET_KEY) {
+    return NextResponse.json({ error: "Stripe is not configured" }, { status: 503 });
+  }
+  const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
   if (!webhookSecret) {
     return NextResponse.json({ error: "Webhook secret not configured" }, { status: 503 });
   }
+  const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
   const body = await request.text();
   const sig = request.headers.get("stripe-signature");

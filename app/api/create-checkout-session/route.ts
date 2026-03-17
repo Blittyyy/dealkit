@@ -1,8 +1,6 @@
 import { NextResponse } from "next/server";
 import Stripe from "stripe";
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
-
 export async function POST(request: Request) {
   if (!process.env.STRIPE_SECRET_KEY) {
     return NextResponse.json(
@@ -10,6 +8,7 @@ export async function POST(request: Request) {
       { status: 503 }
     );
   }
+  const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
   try {
     const body = (await request.json()) as { plan: "pro" | "pro_yearly"; userId?: string };
     const { plan, userId } = body;

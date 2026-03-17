@@ -1,5 +1,6 @@
-import { KitCreatedSuccessContent } from "../success/kit-created-success-content";
+import { redirect } from "next/navigation";
 
+/** Backwards compatibility: old links → same UI at /app/success */
 export const dynamic = "force-dynamic";
 
 function slugFromSearchParams(
@@ -10,11 +11,14 @@ function slugFromSearchParams(
   return Array.isArray(raw) ? raw[0] ?? null : raw || null;
 }
 
-export default function KitLivePage({
+export default function KitLiveRedirect({
   searchParams,
 }: {
   searchParams: Record<string, string | string[] | undefined>;
 }) {
   const slug = slugFromSearchParams(searchParams);
-  return <KitCreatedSuccessContent slug={slug} />;
+  if (slug) {
+    redirect(`/app/success?slug=${encodeURIComponent(slug)}`);
+  }
+  redirect("/app/builder");
 }

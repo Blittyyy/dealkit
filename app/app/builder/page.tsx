@@ -244,7 +244,7 @@ export default function MediaKitBuilderPage() {
     setPublishLoading(true);
     try {
       const result = await saveKit(true);
-      router.replace(`/app/kit-live${result.slug ? `?slug=${encodeURIComponent(result.slug)}` : ""}`);
+      router.replace(`/app/success${result.slug ? `?slug=${encodeURIComponent(result.slug)}` : ""}`);
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Failed to publish media kit.");
     } finally {

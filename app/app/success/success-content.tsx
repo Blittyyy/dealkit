@@ -2,14 +2,14 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import confetti from "canvas-confetti";
 import { Button } from "@/components/ui/button";
 
-type Props = { slug: string | null };
-
-export function KitCreatedSuccessContent({ slug }: Props) {
+export default function SuccessContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const slug = searchParams.get("slug");
   const [countdown, setCountdown] = useState(5);
   const [copied, setCopied] = useState(false);
 
@@ -60,7 +60,7 @@ export function KitCreatedSuccessContent({ slug }: Props) {
             "radial-gradient(circle at 15% 20%, rgba(59,130,246,0.15), transparent 50%), linear-gradient(180deg, #0B1426 0%, #0F1C34 100%)",
         }}
       >
-        <p className="text-sm text-muted">Redirecting…</p>
+        <p className="text-sm text-muted">Loading…</p>
       </div>
     );
   }
@@ -100,9 +100,7 @@ export function KitCreatedSuccessContent({ slug }: Props) {
         </div>
         <div className="mt-8 flex flex-col sm:flex-row gap-3 justify-center">
           <Button asChild size="lg" className="flex-1">
-            <Link href={`/kit/${slug}`}>
-              View my media kit
-            </Link>
+            <Link href={`/kit/${slug}`}>View my media kit</Link>
           </Button>
           <Button
             variant="outline"

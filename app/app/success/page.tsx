@@ -1,27 +1,25 @@
-import { redirect } from "next/navigation";
+import { Suspense } from "react";
+import SuccessContent from "./success-content";
 
-/**
- * Server-only route: no client components, no useSearchParams.
- * Avoids prerender/CSR bailout on /app/success. Real UI lives at /app/kit-live.
- */
-export const dynamic = "force-dynamic";
-
-function slugFromSearchParams(
-  searchParams: Record<string, string | string[] | undefined>
-): string | null {
-  const raw = searchParams.slug;
-  if (raw == null) return null;
-  return Array.isArray(raw) ? raw[0] ?? null : raw || null;
+function SuccessFallback() {
+  return (
+    <div
+      className="min-h-screen flex items-center justify-center px-6"
+      style={{
+        background:
+          "radial-gradient(circle at 15% 20%, rgba(59,130,246,0.15), transparent 50%), linear-gradient(180deg, #0B1426 0%, #0F1C34 100%)",
+      }}
+    >
+      <p className="text-sm text-muted">Loading…</p>
+    </div>
+  );
 }
 
-export default function AppSuccessRedirect({
-  searchParams,
-}: {
-  searchParams: Record<string, string | string[] | undefined>;
-}) {
-  const slug = slugFromSearchParams(searchParams);
-  if (slug) {
-    redirect(`/app/kit-live?slug=${encodeURIComponent(slug)}`);
-  }
-  redirect("/app/builder");
+/** Server Component wrapper — useSearchParams lives only inside SuccessContent (client) + Suspense. */
+export default function SuccessPage() {
+  return (
+    <Suspense fallback={<SuccessFallback />}>
+      <SuccessContent />
+    </Suspense>
+  );
 }

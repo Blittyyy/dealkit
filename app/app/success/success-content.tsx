@@ -2,16 +2,24 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import confetti from "canvas-confetti";
 import { Button } from "@/components/ui/button";
 
+/**
+ * No useSearchParams — it triggers static prerender failures on Vercel even with Suspense.
+ * Read ?slug= from the URL on the client after mount.
+ */
 export default function SuccessContent() {
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const slug = searchParams.get("slug");
+  /** undefined = not hydrated yet; null = no slug; string = kit slug */
+  const [slug, setSlug] = useState<string | null | undefined>(undefined);
   const [countdown, setCountdown] = useState(5);
   const [copied, setCopied] = useState(false);
+
+  useEffect(() => {
+    setSlug(new URLSearchParams(window.location.search).get("slug"));
+  }, []);
 
   useEffect(() => {
     confetti({
@@ -23,6 +31,12 @@ export default function SuccessContent() {
   }, []);
 
   useEffect(() => {
+    if (slug === null) {
+      router.replace("/app/builder");
+    }
+  }, [slug, router]);
+
+  useEffect(() => {
     if (!slug) return;
     if (countdown <= 0) {
       router.replace(`/kit/${slug}`);
@@ -32,24 +46,34 @@ export default function SuccessContent() {
     return () => clearInterval(timer);
   }, [slug, countdown, router]);
 
-  useEffect(() => {
-    if (!slug && typeof window !== "undefined") {
-      router.replace("/app/builder");
-    }
-  }, [slug, router]);
-
   async function handleCopy() {
     if (!slug) return;
-    const url = `${typeof window !== "undefined" ? window.location.origin : ""}/kit/${slug}`;
+    const url = `${window.location.origin}/kit/${slug}`;
     await navigator.clipboard.writeText(url);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   }
 
   const displayUrl =
-    typeof window !== "undefined"
+    typeof window !== "undefined" && slug
       ? `${window.location.host}/kit/${slug}`
-      : `/kit/${slug}`;
+      : slug
+        ? `/kit/${slug}`
+        : "";
+
+  if (slug === undefined) {
+    return (
+      <div
+        className="min-h-screen flex items-center justify-center px-6"
+        style={{
+          background:
+            "radial-gradient(circle at 15% 20%, rgba(59,130,246,0.15), transparent 50%), linear-gradient(180deg, #0B1426 0%, #0F1C34 100%)",
+        }}
+      >
+        <p className="text-sm text-muted">Loading…</p>
+      </div>
+    );
+  }
 
   if (!slug) {
     return (
@@ -60,7 +84,7 @@ export default function SuccessContent() {
             "radial-gradient(circle at 15% 20%, rgba(59,130,246,0.15), transparent 50%), linear-gradient(180deg, #0B1426 0%, #0F1C34 100%)",
         }}
       >
-        <p className="text-sm text-muted">Loading…</p>
+        <p className="text-sm text-muted">Redirecting…</p>
       </div>
     );
   }
@@ -106,17 +130,14 @@ export default function SuccessContent() {
             variant="outline"
             size="lg"
             onClick={handleCopy}
-            disabled={!slug}
             className={`flex-1 min-w-[120px] transition-colors ${copied ? "border-success text-success" : ""}`}
           >
             {copied ? "Copied!" : "Copy link"}
           </Button>
         </div>
-        {slug && (
-          <p className="mt-8 text-sm text-muted animate-pulse-soft">
-            Redirecting to your media kit in {countdown} seconds…
-          </p>
-        )}
+        <p className="mt-8 text-sm text-muted animate-pulse-soft">
+          Redirecting to your media kit in {countdown} seconds…
+        </p>
       </div>
     </div>
   );

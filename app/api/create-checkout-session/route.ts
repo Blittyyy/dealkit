@@ -32,7 +32,13 @@ export async function POST(request: Request) {
       line_items: [{ price: priceId, quantity: 1 }],
       success_url: `${origin}/checkout/success?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${origin}/#pricing`,
-      ...(userId && { client_reference_id: userId }),
+      ...(userId && {
+        client_reference_id: userId,
+        metadata: { supabase_user_id: userId },
+        subscription_data: {
+          metadata: { supabase_user_id: userId },
+        },
+      }),
     });
 
     return NextResponse.json({ url: session.url });
